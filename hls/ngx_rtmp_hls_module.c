@@ -101,6 +101,7 @@ typedef struct {
     ngx_uint_t                          winfrags;
     ngx_flag_t                          continuous;
     ngx_flag_t                          nested;
+    ngx_flag_t                          variant_audio_only;
     ngx_str_t                           path;
     ngx_uint_t                          naming;
     ngx_uint_t                          datetime;
@@ -240,6 +241,13 @@ static ngx_command_t ngx_rtmp_hls_commands[] = {
       ngx_conf_set_flag_slot,
       NGX_RTMP_APP_CONF_OFFSET,
       offsetof(ngx_rtmp_hls_app_conf_t, nested),
+      NULL },
+
+    { ngx_string("hls_variant_audio_only"),
+      NGX_RTMP_MAIN_CONF|NGX_RTMP_SRV_CONF|NGX_RTMP_APP_CONF|NGX_CONF_TAKE1,
+      ngx_conf_set_flag_slot,
+      NGX_RTMP_APP_CONF_OFFSET,
+      offsetof(ngx_rtmp_hls_app_conf_t, variant_audio_only),
       NULL },
 
     { ngx_string("hls_fragment_naming"),
@@ -472,9 +480,12 @@ ngx_rtmp_hls_write_variant_playlist(ngx_rtmp_session_t *s)
     {
         p = buffer;
         last = buffer + sizeof(buffer);
-
-        p = ngx_slprintf(p, last, "#EXT-X-STREAM-INF:PROGRAM-ID=1,CLOSED-CAPTIONS=NONE");
-
+        if (hacf->variant_audio_only) {
+            p = ngx_slprintf(p, last, "#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID=\"group_aud_low\",NAME=\"audio_0\"");
+        }
+        else {
+            p = ngx_slprintf(p, last, "#EXT-X-STREAM-INF:PROGRAM-ID=1,CLOSED-CAPTIONS=NONE");
+        }
         arg = var->args.elts;
         for (k = 0; k < var->args.nelts; k++, arg++) {
             p = ngx_slprintf(p, last, ",%V", arg);
