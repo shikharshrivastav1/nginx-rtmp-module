@@ -481,7 +481,7 @@ ngx_rtmp_hls_write_variant_playlist(ngx_rtmp_session_t *s)
         p = buffer;
         last = buffer + sizeof(buffer);
         if (hacf->variant_audio_only) {
-            p = ngx_slprintf(p, last, "#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID=\"group_aud_low\",NAME=\"audio_0\"");
+            p = ngx_slprintf(p, last, "#EXT-X-MEDIA:TYPE=AUDIO");
         }
         else {
             p = ngx_slprintf(p, last, "#EXT-X-STREAM-INF:PROGRAM-ID=1,CLOSED-CAPTIONS=NONE");
